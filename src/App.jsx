@@ -51,47 +51,51 @@ export default function App() {
   const reset = () => setMovements([]);
 
   return (
-    <div className="app">
+    <>
       <header className="topbar">
-        <div className="brand">
-          <span className="logo" aria-hidden="true" />
-          <div>
-            <h1>CoTa Warehouse</h1>
-            <p className="muted small">Inventory · Replenishment · Picking</p>
+        <div className="topbar-inner">
+          <div className="brand">
+            <span className="logo" aria-hidden="true">CT</span>
+            <div>
+              <h1>CoTa Warehouse</h1>
+              <p className="muted small">Inventory · Replenishment · Picking</p>
+            </div>
           </div>
+          <span className="pill" title="Confirmed changes are stored in this browser">
+            {movements.length} change{movements.length === 1 ? '' : 's'} saved on device
+          </span>
         </div>
-        <span className="pill" title="Confirmed changes are stored in this browser">
-          {movements.length} change{movements.length === 1 ? '' : 's'} saved on device
-        </span>
       </header>
 
-      <nav className="tabs" role="tablist">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            role="tab"
-            aria-selected={tab === t.id}
-            className={tab === t.id ? 'tab active' : 'tab'}
-            onClick={() => setTab(t.id)}
-          >
-            {t.label}
-          </button>
-        ))}
-      </nav>
+      <div className="app">
+        <nav className="tabs" role="tablist">
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              role="tab"
+              aria-selected={tab === t.id}
+              className={tab === t.id ? 'tab active' : 'tab'}
+              onClick={() => setTab(t.id)}
+            >
+              {t.label}
+            </button>
+          ))}
+        </nav>
 
-      <main>
-        {offlineSince && (
-          <div className="notice warn">
-            Offline — showing inventory last loaded {new Date(offlineSince).toLocaleString()}. Confirmed changes are still saved on this device.
-          </div>
-        )}
-        {loadError && <div className="notice error">Could not load inventory: {loadError}</div>}
-        {!state && !loadError && <p className="muted">Loading inventory…</p>}
-        {state && tab === 'search' && <SearchTab state={state} />}
-        {state && tab === 'replenish' && <ReplenishTab state={state} record={record} />}
-        {state && tab === 'pick' && <PickTab state={state} record={record} />}
-        {state && tab === 'history' && <HistoryTab movements={movements} rejected={state.rejected} onReset={reset} />}
-      </main>
-    </div>
+        <main>
+          {offlineSince && (
+            <div className="notice warn">
+              Offline — showing inventory last loaded {new Date(offlineSince).toLocaleString()}. Confirmed changes are still saved on this device.
+            </div>
+          )}
+          {loadError && <div className="notice error">Could not load inventory: {loadError}</div>}
+          {!state && !loadError && <p className="muted">Loading inventory…</p>}
+          {state && tab === 'search' && <SearchTab state={state} />}
+          {state && tab === 'replenish' && <ReplenishTab state={state} record={record} />}
+          {state && tab === 'pick' && <PickTab state={state} record={record} />}
+          {state && tab === 'history' && <HistoryTab movements={movements} rejected={state.rejected} onReset={reset} />}
+        </main>
+      </div>
+    </>
   );
 }
