@@ -108,7 +108,7 @@ The movement log (browser-side) has this shape:
 ## Known limitations
 
 - **Changes are only saved in one browser.** Confirmed changes live in localStorage, so other devices don't see them and clearing site data loses them. The server inventory never changes.
-- **No login and no roles.** There is no record of who confirmed each change.
+- **No login and no roles.** There is no record of who confirmed each change. The header menu (user photo, name and items) is a non-functional mock to show where an account menu would go.
 - **No inventory management screens.** Products, locations and stock can't be added, edited or removed in the app.
 - **Simplified pick routing.** It sorts by aisle and doesn't model aisle sides, a snake-shaped route, or several pickers.
 - **Same-browser race.** Two tabs open in the same browser could each confirm before seeing the other's change. A movement that would make stock negative is rejected when it's applied, but nothing locks stock in the meantime.

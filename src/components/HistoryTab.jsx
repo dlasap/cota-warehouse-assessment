@@ -3,6 +3,12 @@ export default function HistoryTab({ movements, rejected, onReset }) {
 
   return (
     <section>
+      <div className="row-between">
+        <h2 className="section-title">History</h2>
+        <span className="pill" title="Confirmed changes are stored in this browser">
+          {movements.length} change{movements.length === 1 ? '' : 's'} saved on device
+        </span>
+      </div>
       <p className="muted">
         Confirmed picks and replenishments are saved in this browser (localStorage) and survive a page reload. The server's seed
         inventory is never changed.

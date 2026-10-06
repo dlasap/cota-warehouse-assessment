@@ -5,6 +5,7 @@ import SearchTab from './components/SearchTab.jsx';
 import ReplenishTab from './components/ReplenishTab.jsx';
 import PickTab from './components/PickTab.jsx';
 import HistoryTab from './components/HistoryTab.jsx';
+import UserMenu from './components/UserMenu.jsx';
 
 const TABS = [
   { id: 'search', label: 'Search' },
@@ -61,9 +62,7 @@ export default function App() {
               <p className="muted small">Inventory · Replenishment · Picking</p>
             </div>
           </div>
-          <span className="pill" title="Confirmed changes are stored in this browser">
-            {movements.length} change{movements.length === 1 ? '' : 's'} saved on device
-          </span>
+          <UserMenu />
         </div>
       </header>
 
