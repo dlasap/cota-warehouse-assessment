@@ -23,18 +23,37 @@ export default function SearchTab({ state }) {
 
       <div className="stack">
         {results.map((p) => (
-          <article key={p.sku} className="card">
-            <div className="card-head">
-              <div>
-                <div className="sku">{p.sku}</div>
-                <h2>{p.name}</h2>
+          <details key={p.sku} className="card expandable">
+            <summary>
+              <div className="card-head">
+                <div>
+                  <div className="sku">{p.sku}</div>
+                  <h2>{p.name}</h2>
+                </div>
+                <span className="chevron" aria-hidden="true" />
               </div>
-              <span className="pill neutral">{p.unitsPerCase} units / case</span>
-            </div>
+              <div className="summary-stats">
+                <div>
+                  <span className="muted small">Total cases</span>
+                  <strong>{p.totalCases}</strong>
+                </div>
+                <div>
+                  <span className="muted small">Total units</span>
+                  <strong>{p.totalUnits}</strong>
+                </div>
+                <div>
+                  <span className="muted small">Units / case</span>
+                  <strong>{p.unitsPerCase}</strong>
+                </div>
+              </div>
+              <div className="muted small">
+                {p.locations.length === 0
+                  ? 'No cases in storage'
+                  : `${p.locations.length} location${p.locations.length === 1 ? '' : 's'}: ${p.locations.map((l) => l.location).join(', ')}`}
+              </div>
+            </summary>
 
-            {p.locations.length === 0 ? (
-              <p className="notice warn">No cases in storage.</p>
-            ) : (
+            {p.locations.length > 0 && (
               <table className="table">
                 <thead>
                   <tr>
@@ -52,23 +71,18 @@ export default function SearchTab({ state }) {
                     </tr>
                   ))}
                 </tbody>
+                <tfoot>
+                  <tr>
+                    <td className="strong">Total</td>
+                    <td className="num strong">{p.totalCases}</td>
+                    <td className="num strong">
+                      {p.totalUnits} <span className="muted small">({p.totalCases} × {p.unitsPerCase})</span>
+                    </td>
+                  </tr>
+                </tfoot>
               </table>
             )}
-
-            <div className="totals">
-              <div>
-                <span className="muted small">Total cases</span>
-                <strong>{p.totalCases}</strong>
-              </div>
-              <div>
-                <span className="muted small">Total units</span>
-                <strong>{p.totalUnits}</strong>
-                <span className="muted small">
-                  {p.totalCases} × {p.unitsPerCase}
-                </span>
-              </div>
-            </div>
-          </article>
+          </details>
         ))}
       </div>
     </section>
