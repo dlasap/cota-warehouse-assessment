@@ -105,6 +105,10 @@ The movement log (browser-side) has this shape:
 - Replenishment pulls from the lowest aisle first, because the location of the open shelf isn't given.
 - When a pick request can't be fully filled, picking the other lines is acceptable. The short line goes to a supervisor rather than being partly picked.
 - Only TURTLE-01 has open-shelf data. For other SKUs the employee types in capacity and current units.
+- Fewer stops beats strict aisle order. If one location can fill a whole pick line, it is used. Otherwise cases come from each location in walk order.
+- A one-way walk by aisle number is good enough. Aisle sides, snake-shaped routes and the distance back to a packing station are not modelled.
+- "Fill the shelf" means reach capacity. The recommendation rounds up (4 cases for TURTLE-01) and shows the round-down option (3 cases, no opened case) as an alternative.
+- Loose units in overflow are used first at the next replenishment, before any new case is opened.
 
 ## Known limitations
 
