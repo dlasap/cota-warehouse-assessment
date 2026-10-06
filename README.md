@@ -2,7 +2,7 @@
 
 A small mobile-friendly warehouse app for the CoTa AI Automation & Applications Developer assessment.
 
-- **Live app:** _add Vercel URL after deploy_
+- **Live app:** https://cota-warehouse-assessment-smoky.vercel.app/
 - **Part 4 (video + AI design):** [docs/part4-video-ai.md](docs/part4-video-ai.md)
 - **Part 5 (offline reliability):** [docs/part5-offline.md](docs/part5-offline.md)
 - **Original brief:** [docs/ASSESSMENT.md](docs/ASSESSMENT.md) · **Requirements checklist:** [docs/CHECKLIST.md](docs/CHECKLIST.md)

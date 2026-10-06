@@ -3,7 +3,7 @@
 Each requirement from [ASSESSMENT.md](ASSESSMENT.md) mapped to where it is met and how it was verified.
 Last verified **2026-10-06** against the production build (`npm start`), at 375px and 320px phone widths.
 
-Legend: ✅ done · ⏳ pending (needs an action outside the code)
+Legend: ✅ done
 
 ## Part 1 — Inventory search
 
@@ -50,8 +50,8 @@ Legend: ✅ done · ⏳ pending (needs an action outside the code)
 
 | Deliverable | Status | Where / evidence |
 |---|---|---|
-| Working application URL | ⏳ | Deploy with `vercel --prod`, then add the URL to the README |
-| Git repository | ⏳ | Local repo committed; remote `github.com/dlasap/cota-warehouse-assessment` added, **not pushed yet** |
+| Working application URL | ✅ | https://cota-warehouse-assessment-smoky.vercel.app/ — page, `/api/inventory` and images return 200 |
+| Git repository | ✅ | https://github.com/dlasap/cota-warehouse-assessment (public) |
 | README with setup instructions | ✅ | [README.md](../README.md) → Setup |
 | Database/schema description | ✅ | README → Database schema; DDL in [server/seed.js](../server/seed.js) |
 | Short architecture explanation | ✅ | README → Architecture, Why this shape |
