@@ -1,9 +1,19 @@
 import { useState } from 'react';
-import { searchInventory } from '../logic.js';
+import { parseLocation, searchInventory } from '../logic.js';
+
+const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
 export default function SearchTab({ state }) {
   const [query, setQuery] = useState('');
-  const results = searchInventory(state, query);
+  const [aisle, setAisle] = useState(null); // null = all aisles
+
+  const aisles = [...new Set(state.stock.filter((r) => r.cases > 0).map((r) => parseLocation(r.location).aisle))].sort(
+    (a, b) => a - b
+  );
+  const matches = searchInventory(state, query);
+  const results =
+    aisle === null ? matches : matches.filter((p) => p.locations.some((l) => parseLocation(l.location).aisle === aisle));
+  const filtered = query.trim() !== '' || aisle !== null;
 
   return (
     <section>
@@ -19,44 +29,56 @@ export default function SearchTab({ state }) {
         />
       </label>
 
-      {results.length === 0 && <div className="notice">No products match “{query.trim()}”.</div>}
+      <div className="filter-bar">
+        <div className="chips" role="group" aria-label="Filter by aisle">
+          <button className={aisle === null ? 'chip active' : 'chip'} onClick={() => setAisle(null)}>
+            All aisles
+          </button>
+          {aisles.map((a) => (
+            <button key={a} className={aisle === a ? 'chip active' : 'chip'} onClick={() => setAisle(a)}>
+              A{a}
+            </button>
+          ))}
+        </div>
+        <div className="row-between">
+          <span className="muted small" aria-live="polite">
+            Showing {results.length} of {plural(state.products.length, 'product')}
+          </span>
+          {filtered && (
+            <button className="btn link small" onClick={() => { setQuery(''); setAisle(null); }}>
+              Clear
+            </button>
+          )}
+        </div>
+      </div>
 
-      <div className="stack">
+      {results.length === 0 && <div className="notice">No products match these filters.</div>}
+
+      <div className="stack tight">
         {results.map((p) => (
           <details key={p.sku} className="card expandable">
             <summary>
-              <div className="card-head">
-                <div className="product-id">
-                  {p.imageUrl && <img className="thumb" src={p.imageUrl} alt="" loading="lazy" width="56" height="56" />}
-                  <div>
-                    <div className="sku">{p.sku}</div>
-                    <h2>{p.name}</h2>
-                  </div>
-                </div>
-                <span className="chevron" aria-hidden="true" />
-              </div>
-              <div className="summary-stats">
-                <div>
-                  <span className="muted small">Total cases</span>
-                  <strong>{p.totalCases}</strong>
-                </div>
-                <div>
-                  <span className="muted small">Total units</span>
-                  <strong>{p.totalUnits}</strong>
-                </div>
-                <div>
-                  <span className="muted small">Units / case</span>
-                  <strong>{p.unitsPerCase}</strong>
+              {p.imageUrl ? (
+                <img className="thumb" src={p.imageUrl} alt="" loading="lazy" width="44" height="44" />
+              ) : (
+                <span className="thumb" aria-hidden="true" />
+              )}
+              <div className="grow">
+                <div className="item-name">{p.name}</div>
+                <div className="muted small truncate">
+                  <span className="sku">{p.sku}</span> · {p.unitsPerCase}/case
                 </div>
               </div>
-              <div className="muted small">
-                {p.locations.length === 0
-                  ? 'No cases in storage'
-                  : `${p.locations.length} location${p.locations.length === 1 ? '' : 's'}: ${p.locations.map((l) => l.location).join(', ')}`}
+              <div className="item-total">
+                <strong>{plural(p.totalCases, 'case')}</strong>
+                <span className="muted small">{p.totalUnits} units</span>
               </div>
+              <span className="chevron" aria-hidden="true" />
             </summary>
 
-            {p.locations.length > 0 && (
+            {p.locations.length === 0 ? (
+              <p className="notice warn">No cases in storage.</p>
+            ) : (
               <table className="table">
                 <thead>
                   <tr>

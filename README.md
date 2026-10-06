@@ -8,7 +8,7 @@ A small mobile-friendly warehouse app for the CoTa AI Automation & Applications 
 
 | Tab | Assessment part | What it does |
 |---|---|---|
-| **Search** | Part 1 | Search by SKU or product name. Shows units/case, every location with cases, total cases and total units. |
+| **Search** | Part 1 | Search by SKU or product name, filter by aisle, result count. Compact rows show units/case and total cases/units; tap to see every location with its cases. |
 | **Replenish** | Part 2 | Open-shelf capacity and current units → units needed, full cases to pull, where to pull them from, and what happens to leftover units. |
 | **Pick list** | Part 3 | Enter SKU + cases lines → sequenced pick list in aisle order. Lines that cannot be filled appear in a red **Cannot pick** panel. |
 | **History** | Persistence | Confirmed picks and replenishments, saved in the browser. **Reset demo data** clears them. |
