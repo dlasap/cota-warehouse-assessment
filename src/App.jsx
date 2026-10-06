@@ -92,7 +92,9 @@ export default function App() {
           {state && tab === 'search' && <SearchTab state={state} />}
           {state && tab === 'replenish' && <ReplenishTab state={state} record={record} />}
           {state && tab === 'pick' && <PickTab state={state} record={record} />}
-          {state && tab === 'history' && <HistoryTab movements={movements} rejected={state.rejected} onReset={reset} />}
+          {state && tab === 'history' && (
+            <HistoryTab movements={movements} rejected={state.rejected} products={state.products} onReset={reset} />
+          )}
         </main>
       </div>
     </>

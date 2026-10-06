@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { allocateFromStorage, planReplenishment, replenishMovement } from '../logic.js';
+import Thumb from './Thumb.jsx';
 
 const toInt = (s) => (String(s).trim() === '' ? NaN : Number(s));
 const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
@@ -71,6 +72,20 @@ function ReplenishForm({ state, sku, shelf, onConfirm }) {
 
   return (
     <>
+      <div className="card product-preview">
+        <Thumb product={product} size={64} />
+        <div className="grow">
+          <div className="item-name">{product.name}</div>
+          <div className="muted small">
+            <span className="sku">{product.sku}</span> · {product.unitsPerCase} units per case
+          </div>
+          <div className="muted small">
+            {plural(storageCases, 'case')} in storage
+            {overflow > 0 && ` · ${overflow} loose units in overflow`}
+          </div>
+        </div>
+      </div>
+
       <div className="grid-2">
         <label className="field">
           <span>Shelf capacity (units)</span>
@@ -81,10 +96,6 @@ function ReplenishForm({ state, sku, shelf, onConfirm }) {
           <input type="number" inputMode="numeric" min="0" step="1" value={current} onChange={(e) => setCurrent(e.target.value)} />
         </label>
       </div>
-      <p className="muted small">
-        {product.unitsPerCase} units per case · {plural(storageCases, 'case')} in storage
-        {overflow > 0 && ` · ${overflow} loose units in overflow`}
-      </p>
 
       {plan.status === 'invalid' && (
         <div className="notice error">

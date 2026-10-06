@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { parseLocation, searchInventory } from '../logic.js';
+import Thumb from './Thumb.jsx';
 
 const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
@@ -58,11 +59,7 @@ export default function SearchTab({ state }) {
         {results.map((p) => (
           <details key={p.sku} className="card expandable">
             <summary>
-              {p.imageUrl ? (
-                <img className="thumb" src={p.imageUrl} alt="" loading="lazy" width="44" height="44" />
-              ) : (
-                <span className="thumb" aria-hidden="true" />
-              )}
+              <Thumb product={p} />
               <div className="grow">
                 <div className="item-name">{p.name}</div>
                 <div className="muted small truncate">

@@ -1,12 +1,14 @@
 import { useMemo, useState } from 'react';
 import { buildPickList, parseLocation, pickMovement } from '../logic.js';
+import Thumb from './Thumb.jsx';
 
 const EXAMPLE = [
-  { sku: 'TURTLE-01', cases: '3' },
-  { sku: 'SHARK-02', cases: '2' },
+  { sku: 'TURTLE-01', cases: '1' },
+  { sku: 'SHARK-02', cases: '1' },
   { sku: 'ALIEN-04', cases: '1' },
 ];
-const EMPTY = [{ sku: '', cases: '' }];
+const NEW_LINE = { sku: '', cases: '1' };
+const EMPTY = [NEW_LINE];
 
 export default function PickTab({ state, record }) {
   const [lines, setLines] = useState(EXAMPLE);
@@ -17,6 +19,7 @@ export default function PickTab({ state, record }) {
     [state, lines]
   );
   const aisles = [...new Set(list.picks.map((p) => parseLocation(p.location).aisle))];
+  const productBySku = new Map(state.products.map((p) => [p.sku, p]));
 
   const update = (i, patch) => {
     setDone(null);
@@ -75,7 +78,7 @@ export default function PickTab({ state, record }) {
           </div>
         ))}
       </div>
-      <button className="btn ghost" onClick={() => setLines((ls) => [...ls, { sku: '', cases: '' }])}>
+      <button className="btn ghost" onClick={() => setLines((ls) => [...ls, NEW_LINE])}>
         + Add line
       </button>
 
@@ -106,10 +109,11 @@ export default function PickTab({ state, record }) {
             {list.picks.map((p) => (
               <li key={`${p.sku}@${p.location}`}>
                 <span className="seq">{p.sequence}</span>
+                <Thumb product={productBySku.get(p.sku)} />
                 <div className="grow">
                   <div className="mono strong">{p.location}</div>
-                  <div className="muted small">
-                    {p.sku} · {p.name}
+                  <div className="muted small truncate">
+                    <span className="sku">{p.sku}</span> · {p.name}
                   </div>
                 </div>
                 <div className="qty">
