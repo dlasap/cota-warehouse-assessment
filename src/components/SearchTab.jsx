@@ -26,9 +26,12 @@ export default function SearchTab({ state }) {
           <details key={p.sku} className="card expandable">
             <summary>
               <div className="card-head">
-                <div>
-                  <div className="sku">{p.sku}</div>
-                  <h2>{p.name}</h2>
+                <div className="product-id">
+                  {p.imageUrl && <img className="thumb" src={p.imageUrl} alt="" loading="lazy" width="56" height="56" />}
+                  <div>
+                    <div className="sku">{p.sku}</div>
+                    <h2>{p.name}</h2>
+                  </div>
                 </div>
                 <span className="chevron" aria-hidden="true" />
               </div>

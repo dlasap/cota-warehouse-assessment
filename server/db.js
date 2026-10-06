@@ -17,7 +17,7 @@ function getDb() {
 export function getInventorySnapshot() {
   const conn = getDb();
   const products = conn
-    .prepare('SELECT sku, name, units_per_case AS unitsPerCase FROM products ORDER BY sku')
+    .prepare('SELECT sku, name, units_per_case AS unitsPerCase, image_url AS imageUrl FROM products ORDER BY sku')
     .all();
   const stock = conn
     .prepare(

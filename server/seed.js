@@ -4,7 +4,8 @@ export const SCHEMA_AND_SEED = `
 CREATE TABLE products (
   sku            TEXT PRIMARY KEY,
   name           TEXT NOT NULL,
-  units_per_case INTEGER NOT NULL CHECK (units_per_case > 0)
+  units_per_case INTEGER NOT NULL CHECK (units_per_case > 0),
+  image_url      TEXT                 -- product preview image (served from /public)
 );
 
 CREATE TABLE locations (
@@ -29,11 +30,11 @@ CREATE TABLE open_shelf (
   CHECK (current_units <= capacity_units)
 );
 
-INSERT INTO products (sku, name, units_per_case) VALUES
-  ('TURTLE-01', 'Sea Turtle Plush', 12),
-  ('SHARK-02',  'Shark Plush',       8),
-  ('MOOSE-03',  'Moose Plush',       6),
-  ('ALIEN-04',  'Alien Plush',      12);
+INSERT INTO products (sku, name, units_per_case, image_url) VALUES
+  ('TURTLE-01', 'Sea Turtle Plush', 12, '/products/turtle-01.webp'),
+  ('SHARK-02',  'Shark Plush',       8, '/products/shark-02.webp'),
+  ('MOOSE-03',  'Moose Plush',       6, '/products/moose-03.webp'),
+  ('ALIEN-04',  'Alien Plush',      12, '/products/alien-04.webp');
 
 INSERT INTO locations (code, aisle, rack, shelf) VALUES
   ('A1-R2-S1', 1, 2, 1),

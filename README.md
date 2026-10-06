@@ -57,7 +57,8 @@ localStorage: confirmed movements + last inventory snapshot
 ## Database schema
 
 ```sql
-products   (sku TEXT PK, name TEXT, units_per_case INT > 0)
+products   (sku TEXT PK, name TEXT, units_per_case INT > 0,
+            image_url TEXT)          -- preview image in public/products/
 locations  (code TEXT PK,            -- 'A1-R2-S1'
             aisle INT, rack INT, shelf INT)   -- parsed for sorting/sequence
 inventory  (sku FK → products, location_code FK → locations,
