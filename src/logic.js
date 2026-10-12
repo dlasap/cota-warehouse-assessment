@@ -68,10 +68,13 @@ export function applyMovements(snapshot, movements = []) {
 // Part 1 — search
 // ---------------------------------------------------------------------------
 
+// A query like "A4" or "a1-r2" is treated as a location prefix as well.
+const LOCATION_QUERY_RE = /^a\d/;
+
 export function searchInventory(state, query) {
   const q = String(query ?? '').trim().toLowerCase();
+  const byLocation = LOCATION_QUERY_RE.test(q);
   return state.products
-    .filter((p) => !q || p.sku.toLowerCase().includes(q) || p.name.toLowerCase().includes(q))
     .map((p) => {
       const locations = state.stock
         .filter((r) => r.sku === p.sku && r.cases > 0)
@@ -79,7 +82,23 @@ export function searchInventory(state, query) {
         .map((r) => ({ location: r.location, cases: r.cases }));
       const totalCases = locations.reduce((sum, l) => sum + l.cases, 0);
       return { ...p, locations, totalCases, totalUnits: totalCases * p.unitsPerCase };
-    });
+    })
+    .filter(
+      (p) =>
+        !q ||
+        p.sku.toLowerCase().includes(q) ||
+        p.name.toLowerCase().includes(q) ||
+        (byLocation && p.locations.some((l) => l.location.toLowerCase().startsWith(q)))
+    );
+}
+
+export const LOW_STOCK_CASES = 5;
+
+/** 'out' (0 cases), 'low' (1–LOW_STOCK_CASES) or 'ok'. */
+export function stockLevel(totalCases) {
+  if (totalCases <= 0) return 'out';
+  if (totalCases <= LOW_STOCK_CASES) return 'low';
+  return 'ok';
 }
 
 // ---------------------------------------------------------------------------
@@ -89,8 +108,10 @@ export function searchInventory(state, query) {
 /**
  * Works out how many full cases to pull to fill an open shelf.
  * Leftover units from an already-opened case ("overflow") are used first.
+ * With `noLeftover`, only cases that fit on the shelf whole are pulled: the shelf may
+ * stay a little below full, but no case is opened and left over.
  */
-export function planReplenishment({ capacity, current, overflow = 0, unitsPerCase, storageCases }) {
+export function planReplenishment({ capacity, current, overflow = 0, unitsPerCase, storageCases, noLeftover = false }) {
   const errors = [];
   if (!isPositiveWhole(capacity)) errors.push('Shelf capacity must be a whole number above 0.');
   if (!isWholeNumber(current)) errors.push('Current shelf units must be a whole number (0 or more).');
@@ -106,7 +127,9 @@ export function planReplenishment({ capacity, current, overflow = 0, unitsPerCas
 
   const fromOverflow = Math.min(overflow, unitsNeeded);
   const unitsFromCases = unitsNeeded - fromOverflow;
-  const casesRequired = Math.ceil(unitsFromCases / unitsPerCase);
+  const casesToFill = Math.ceil(unitsFromCases / unitsPerCase);
+  const casesWhole = Math.floor(unitsFromCases / unitsPerCase);
+  const casesRequired = noLeftover ? casesWhole : casesToFill;
   const casesToPull = Math.min(casesRequired, storageCases);
   const unitsPulled = casesToPull * unitsPerCase;
   const unitsOnShelf = Math.min(unitsFromCases, unitsPulled);
@@ -114,10 +137,11 @@ export function planReplenishment({ capacity, current, overflow = 0, unitsPerCas
   const shelfAfter = current + fromOverflow + unitsOnShelf;
 
   // Option that never opens a case it cannot fully shelve.
-  const casesNoLeftover = Math.min(Math.floor(unitsFromCases / unitsPerCase), storageCases);
+  const casesNoLeftover = Math.min(casesWhole, storageCases);
 
   return {
     status: casesToPull < casesRequired ? 'short' : 'ok',
+    mode: noLeftover ? 'no-leftover' : 'fill',
     unitsNeeded,
     fromOverflow,
     unitsFromCases,
@@ -129,6 +153,7 @@ export function planReplenishment({ capacity, current, overflow = 0, unitsPerCas
     shelfAfter,
     overflowAfter: overflow - fromOverflow + leftoverUnits,
     storageCases,
+    storageAfter: storageCases - casesToPull,
     noLeftoverOption: {
       cases: casesNoLeftover,
       shelfAfter: current + fromOverflow + casesNoLeftover * unitsPerCase,
@@ -136,11 +161,19 @@ export function planReplenishment({ capacity, current, overflow = 0, unitsPerCas
   };
 }
 
-/** Takes `cases` from a SKU's locations in walk order (lowest aisle first). */
+/**
+ * Chooses where to take `cases` of one SKU from. Fewer stops first: one location that
+ * holds the whole quantity (lowest aisle if several do); otherwise split across
+ * locations in walk order. Used by both replenishment and picking.
+ */
 export function allocateFromStorage(stockRows, cases) {
+  const rows = [...stockRows].filter((r) => r.cases > 0).sort((a, b) => compareLocations(a.location, b.location));
+  const single = rows.find((r) => r.cases >= cases);
+  if (single) return cases > 0 ? [{ location: single.location, cases }] : [];
+
   const takes = [];
   let remaining = cases;
-  for (const row of [...stockRows].filter((r) => r.cases > 0).sort((a, b) => compareLocations(a.location, b.location))) {
+  for (const row of rows) {
     if (remaining === 0) break;
     const take = Math.min(row.cases, remaining);
     takes.push({ location: row.location, cases: take });
@@ -195,10 +228,7 @@ export function buildPickList(state, requestLines) {
       });
       continue;
     }
-    // Fewer stops: prefer one location that holds the whole quantity.
-    const single = rows.find((r) => r.cases >= requested);
-    const takes = single ? [{ location: single.location, cases: requested }] : allocateFromStorage(rows, requested);
-    for (const t of takes) picks.push({ sku, name: product.name, ...t });
+    for (const t of allocateFromStorage(rows, requested)) picks.push({ sku, name: product.name, ...t });
   }
 
   picks.sort((a, b) => compareLocations(a.location, b.location) || a.sku.localeCompare(b.sku));

@@ -4,6 +4,8 @@ import {
   parseLocation,
   applyMovements,
   searchInventory,
+  stockLevel,
+  LOW_STOCK_CASES,
   planReplenishment,
   allocateFromStorage,
   buildPickList,
@@ -48,6 +50,19 @@ describe('Part 1 — search', () => {
     expect(searchInventory(fresh(), 'plush')).toHaveLength(4);
     expect(searchInventory(fresh(), 'giraffe')).toEqual([]);
   });
+
+  it('finds products by location code prefix', () => {
+    expect(searchInventory(fresh(), 'A4').map((r) => r.sku)).toEqual(['TURTLE-01']);
+    expect(searchInventory(fresh(), 'a3-r4').map((r) => r.sku)).toEqual(['ALIEN-04']);
+    expect(searchInventory(fresh(), 'A9')).toEqual([]);
+  });
+
+  it('classifies stock level', () => {
+    expect(stockLevel(0)).toBe('out');
+    expect(stockLevel(4)).toBe('low');
+    expect(stockLevel(LOW_STOCK_CASES)).toBe('low');
+    expect(stockLevel(LOW_STOCK_CASES + 1)).toBe('ok');
+  });
 });
 
 describe('Part 2 — replenishment', () => {
@@ -87,7 +102,29 @@ describe('Part 2 — replenishment', () => {
     expect(planReplenishment({ capacity: 0, current: 0, unitsPerCase: 12, storageCases: 25 }).status).toBe('invalid');
   });
 
-  it('allocates from the lowest aisle first', () => {
+  it('can pull only whole cases so nothing is left over', () => {
+    const plan = planReplenishment({ capacity: 60, current: 17, unitsPerCase: 12, storageCases: 25, noLeftover: true });
+    expect(plan.status).toBe('ok');
+    expect(plan.mode).toBe('no-leftover');
+    expect(plan.casesToPull).toBe(3);
+    expect(plan.leftoverUnits).toBe(0);
+    expect(plan.shelfAfter).toBe(53);
+    expect(plan.overflowAfter).toBe(0);
+  });
+
+  it('reports storage left after the pull', () => {
+    expect(planReplenishment({ capacity: 60, current: 17, unitsPerCase: 12, storageCases: 25 }).storageAfter).toBe(21);
+  });
+
+  it('prefers one location that holds the whole quantity, even if it is further along', () => {
+    const rows = [
+      { sku: 'X', location: 'A1-R1-S1', cases: 2 },
+      { sku: 'X', location: 'A4-R1-S1', cases: 7 },
+    ];
+    expect(allocateFromStorage(rows, 5)).toEqual([{ location: 'A4-R1-S1', cases: 5 }]);
+  });
+
+  it('splits across locations in walk order when no single location is enough', () => {
     const rows = fresh().stock.filter((r) => r.sku === 'TURTLE-01');
     expect(allocateFromStorage(rows, 20)).toEqual([
       { location: 'A1-R2-S1', cases: 18 },

@@ -33,11 +33,11 @@ Legend: ✅ done
 
 | Requirement | Status | Where / evidence |
 |---|---|---|
-| User enters the request | ✅ | SKU + cases lines, example pre-loaded |
+| User enters the request | ✅ | Product dropdown (SKU — name, cases in storage) + cases per line, example pre-loaded |
 | Shows SKU, location, cases, sequence | ✅ | 1 · A1-R2-S1 · TURTLE-01 × 3 → 2 · A2-R3-S1 · SHARK-02 × 2 → 3 · A3-R4-S2 · ALIEN-04 × 1 |
 | Aisle order, avoids backtracking | ✅ | Sorted by aisle → rack → shelf; one location per SKU where possible; route shown as "Aisle 1 → 2 → 3" |
 | Insufficient inventory handled clearly | ✅ | ALIEN-04 × 9 → red **Cannot pick**: "Only 4 cases in storage — 5 short." The line is excluded and never partly picked |
-| Bad input | ✅ | Unknown SKU ("SKU not found"), invalid quantity, duplicate lines merged |
+| Bad input | ✅ | Invalid quantity, duplicate lines merged; unknown SKU ("SKU not found") still handled in logic + tests, though the dropdown prevents it in the UI |
 
 ## Parts 4 and 5 — Written responses
 
@@ -62,7 +62,7 @@ Legend: ✅ done
 
 | Check | Result |
 |---|---|
-| `npm test` | 20 / 20 passing (search, replenishment, pick list, movements) |
+| `npm test` | 25 / 25 passing (search, replenishment, pick list, movements) |
 | `npm run build` | Builds cleanly |
 | Production server | `GET /` 200 · `GET /api/inventory` 200 (4 products, 5 stock rows, 1 open shelf) · images 200 |
 | Persistence | Confirmed pick + replenishment reduce stock and survive reload; History lists them; Reset clears them |

@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+import EditPickDialog from './EditPickDialog.jsx';
 import Thumb from './Thumb.jsx';
 
 const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
@@ -31,6 +33,22 @@ function groupByDay(movements) {
 export default function HistoryTab({ movements, rejected, products, onReset }) {
   const rejectedIds = new Set(rejected.map((m) => m.id));
   const productBySku = new Map(products.map((p) => [p.sku, p]));
+  // Mock correction flow: nothing leaves the browser and stock is untouched.
+  const [editing, setEditing] = useState(null);
+  const [reported, setReported] = useState({});
+  const [toast, setToast] = useState(null);
+
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 4000);
+    return () => clearTimeout(t);
+  }, [toast]);
+
+  const sendCorrection = ({ reason }) => {
+    setReported((r) => ({ ...r, [editing.id]: reason }));
+    setEditing(null);
+    setToast('Correction sent to your manager for review.');
+  };
 
   return (
     <section>
@@ -56,7 +74,14 @@ export default function HistoryTab({ movements, rejected, products, onReset }) {
             <h3 className="day-label">{g.label}</h3>
             <ol className="history">
               {g.items.map((m) => (
-                <HistoryEntry key={m.id} movement={m} productBySku={productBySku} rejected={rejectedIds.has(m.id)} />
+                <HistoryEntry
+                  key={m.id}
+                  movement={m}
+                  productBySku={productBySku}
+                  rejected={rejectedIds.has(m.id)}
+                  reported={reported[m.id]}
+                  onEdit={() => setEditing(m)}
+                />
               ))}
             </ol>
           </div>
@@ -74,11 +99,27 @@ export default function HistoryTab({ movements, rejected, products, onReset }) {
           </button>
         </div>
       )}
+
+      {editing && (
+        <EditPickDialog
+          movement={editing}
+          productBySku={productBySku}
+          onClose={() => setEditing(null)}
+          onSubmit={sendCorrection}
+        />
+      )}
+
+      {toast && (
+        <div className="toast" role="status">
+          <strong>✓ {toast}</strong>
+          <span className="small">Demo only — nothing was actually sent.</span>
+        </div>
+      )}
     </section>
   );
 }
 
-function HistoryEntry({ movement: m, productBySku, rejected }) {
+function HistoryEntry({ movement: m, productBySku, rejected, reported, onEdit }) {
   const deltas = m.stockDeltas ?? [];
   const totalCases = deltas.reduce((sum, d) => sum + Math.abs(d.cases), 0);
   const isPick = m.type === 'pick';
@@ -104,6 +145,7 @@ function HistoryEntry({ movement: m, productBySku, rejected }) {
               <span className={`badge ${m.type}`}>{isPick ? 'Pick' : 'Replenish'}</span>
               <span className="muted truncate">{meta}</span>
               {rejected && <span className="rejected-flag">Not applied</span>}
+              {reported && <span className="reported-flag">Correction sent</span>}
             </div>
           </div>
           <time className="muted small entry-time" dateTime={m.at} title={new Date(m.at).toLocaleString()}>
@@ -148,6 +190,17 @@ function HistoryEntry({ movement: m, productBySku, rejected }) {
           )}
 
           {rejected && <div className="notice error small">Not applied: it would make stock negative.</div>}
+
+          {isPick && !rejected &&
+            (reported ? (
+              <div className="notice warn small">
+                Correction sent to your manager ({reported.toLowerCase()}). Awaiting review.
+              </div>
+            ) : (
+              <button type="button" className="btn edit-pick" onClick={onEdit}>
+                Edit what was picked
+              </button>
+            ))}
         </div>
       </details>
     </li>

@@ -83,9 +83,10 @@ The movement log (browser-side) has this shape:
 
 **Part 2 — replenishment (TURTLE-01: capacity 60, current 17, 12 units/case)**
 - Units needed = 60 − 17 = **43**.
-- Cases to pull = ⌈43 ÷ 12⌉ = **4 cases (48 units)**, taken from the lowest aisle first (A1-R2-S1).
+- Cases to pull = ⌈43 ÷ 12⌉ = **4 cases (48 units)**, all from A1-R2-S1, which holds enough on its own.
 - **The catch:** 48 − 43 = **5 units won't fit**. The app tells the employee to keep the opened case in the SKU's overflow spot rather than put it back in storage, which is counted in full cases. Those 5 units are recorded and used first at the next replenishment.
-- **Alternative shown:** if loose units can't be held, pull 3 cases instead. The shelf reaches 53/60 and no case is opened.
+- **Alternative offered:** the employee can switch to **Whole cases only** and confirm 3 cases instead. The shelf reaches 53/60 and no case is opened.
+- **Low-stock warning:** the screen shows how many cases remain in storage after the pull, and warns when that is 5 cases or fewer.
 - **Also handled:** shelf already full, not enough stock in storage, and invalid input (for example, current > capacity).
 
 **Part 3 — pick list**
@@ -102,10 +103,9 @@ The movement log (browser-side) has this shape:
 - Aisle numbers follow the physical walking order, and a lower rack or shelf number comes earlier within an aisle.
 - Location codes always follow the `A{aisle}-R{rack}-S{shelf}` pattern.
 - Storage holds full cases only. Loose units exist only on the open shelf or in its overflow spot.
-- Replenishment pulls from the lowest aisle first, because the location of the open shelf isn't given.
+- Replenishment and picking use the same storage rule: one location that holds the whole quantity if possible (fewer stops), otherwise cases come from each location in walk order, lowest aisle first. The open shelf's own location isn't given.
 - When a pick request can't be fully filled, picking the other lines is acceptable. The short line goes to a supervisor rather than being partly picked.
 - Only TURTLE-01 has open-shelf data. For other SKUs the employee types in capacity and current units.
-- Fewer stops beats strict aisle order. If one location can fill a whole pick line, it is used. Otherwise cases come from each location in walk order.
 - A one-way walk by aisle number is good enough. Aisle sides, snake-shaped routes and the distance back to a packing station are not modelled.
 - "Fill the shelf" means reach capacity. The recommendation rounds up (4 cases for TURTLE-01) and shows the round-down option (3 cases, no opened case) as an alternative.
 - Loose units in overflow are used first at the next replenishment, before any new case is opened.
